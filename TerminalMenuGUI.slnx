@@ -1,3 +1,6 @@
 <Solution>
-  <Project Path="TerminalMenuGUI.csproj" />
+  <Project Path="TerminalMenuGUI.Core/TerminalMenuGUI.Core.csproj" />
+  <Project Path="TerminalMenuGUI.Demo/TerminalMenuGUI.Demo.csproj" />
+  <Project Path="TerminalMenuGUI.TerminalGui/TerminalMenuGUI.TerminalGui.csproj" />
+  <Project Path="TerminalMenuGUI.Tests/TerminalMenuGUI.Tests.csproj" />
 </Solution>
