@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
   <Project Path="TerminalMenuGUI.Core/TerminalMenuGUI.Core.csproj" />
   <Project Path="TerminalMenuGUI.Demo/TerminalMenuGUI.Demo.csproj" />
   <Project Path="TerminalMenuGUI.TerminalGui/TerminalMenuGUI.TerminalGui.csproj" />
