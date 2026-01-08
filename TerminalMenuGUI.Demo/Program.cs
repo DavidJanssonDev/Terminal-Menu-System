@@ -1,6 +1,7 @@
 ﻿using TerminalMenuGUI.Core;
 using TerminalMenuGUI.Core.Dom;
 using TerminalMenuGUI.Core.Styling;
+using TerminalMenuGUI.TerminalGui.Rendering;
 
 var ui =
     Ui.Div(id: "app", @class: "layout").Add(
@@ -21,7 +22,4 @@ var css = new StyleSheet()
 var computed = StyleComputer.Compute(ui, css);
 
 // quick debug output
-foreach (var (el, style) in computed)
-{
-    Console.WriteLine($"{el.Type} id={el.Id} classes=[{string.Join(",", el.Classes)}] bg={style.Bg}");
-}
+new TerminalGuiRenderer().Run(ui, computed);

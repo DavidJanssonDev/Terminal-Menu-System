@@ -28,55 +28,83 @@ public sealed class TerminalGuiRenderer
         var top = Application.Top;
         top.RemoveAll();
 
-        var rootView = RenderElement(root, styles);
+        var rootView = RenderElement(root, styles).view;
+        rootView.X = 0;
+        rootView.Y = 0;
+        rootView.Width = Dim.Fill();
+        rootView.Height = Dim.Fill();
+
         top.Add(rootView);
 
         Application.Run();
         Application.Shutdown();
     }
 
-    private View RenderElement(Element element, IReadOnlyDictionary<Element, Style> styles)
+    private (View view, int height) RenderElement(Element element, IReadOnlyDictionary<Element, Style> styles)
     {
-        // For now everything is vertical stacked
         var view = new View
         {
             X = 0,
-            Y = Pos.(),
-            Width = Dim.Fill(),
-            Height = Dim.Auto()
+            Y = 0,
+            Width = Dim.Fill()
         };
 
-        if (styles.TryGetValue(element, out var style))
+        styles.TryGetValue(element, out var style);
+        if (style is not null)
             _styleMapper.Apply(view, style);
+
+        int y = 0;
 
         foreach (var child in element.Children)
         {
             switch (child)
             {
                 case TextNode text:
-                    view.Add(RenderText(text, style));
-                    break;
+                    {
+                        RenderTextNode(text, ref view, style, ref y);
+                        break;
+                    }
 
                 case Element el:
-                    view.Add(RenderElement(el, styles));
-                    break;
+                    {
+                        var rendered = RenderElement(el, styles);
+                        ElementConfig(ref rendered, ref view, ref y);
+                        break;
+                    }
             }
         }
 
-        return view;
+        // Make the container tall enough for its children
+        view.Height = y <= 0 ? 1 : y;
+
+        return (view, y <= 0 ? 1 : y);
     }
 
-    private View RenderText(TextNode text, Style? parentStyle)
+    private void RenderTextNode(TextNode text, ref View view, Style? style, ref int y)
     {
         var label = new Label(text.Text)
         {
             X = 0,
-            Y = Pos.Auto()
+            Y = y,
+            Width = Dim.Fill(),
+            Height = 1
         };
 
-        if (parentStyle is not null)
-            _styleMapper.Apply(label, parentStyle);
+        if (style is not null)
+            _styleMapper.Apply(label, style);
 
-        return label;
+        view.Add(label);
+        y += 1;
+    }
+
+    private static void ElementConfig(ref (View view, int height) rendered, ref View view, ref int y)
+    {
+        rendered.view.X = 0;
+        rendered.view.Y = y;
+        rendered.view.Width = Dim.Fill();
+        rendered.view.Height = rendered.height <= 0 ? 1 : rendered.height;
+
+        view.Add(rendered.view);
+        y += rendered.view.Height is not null ? rendered.height : rendered.height; // keep it simple
     }
 }

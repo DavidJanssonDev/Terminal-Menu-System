@@ -1,5 +1,6 @@
 ﻿using Terminal.Gui;
 using TerminalMenuGUI.Core.Styling;
+using TerminalMenuGUI.TerminalGui.Utilities;
 using Attribute = Terminal.Gui.Attribute;
 
 namespace TerminalMenuGUI.TerminalGui.Mapping;
@@ -10,31 +11,34 @@ namespace TerminalMenuGUI.TerminalGui.Mapping;
 public sealed class StyleMapper
 {
     /// <summary>
-    /// Applies a Core style to a Terminal.Gui view.
+    /// Applies the specified style to the given view, updating its color scheme if foreground or background colors are
+    /// defined.
     /// </summary>
-    /// <param name="view">The target view.</param>
-    /// <param name="style">The style to apply.</param>
+    /// <remarks>If the style specifies foreground or background colors, the view's color scheme is updated
+    /// accordingly. Padding settings in the style are currently ignored due to platform limitations.</remarks>
+    /// <param name="view">The view to which the style will be applied. Must not be null.</param>
+    /// <param name="style">The style containing foreground and background color information to apply to the view.</param>
     public void Apply(View view, Style style)
     {
+        // Colors: Core uses ConsoleColor?, Terminal.Gui uses Color
         if (style.Fg is not null || style.Bg is not null)
         {
+            var fg = style.Fg is null
+                ? Colors.Base.Normal.Foreground
+                : ColorConverter.FromConsole(style.Fg.Value);
+
+            var bg = style.Bg is null
+                ? Colors.Base.Normal.Background
+                : ColorConverter.FromConsole(style.Bg.Value);
+
             view.ColorScheme = new ColorScheme
             {
-                Normal = Attribute.Make(
-                    style.Fg ?? Colors.Base.Normal.Foreground,
-                    style.Bg ?? Colors.Base.Normal.Background
-                )
+                Normal = Attribute.Make(fg, bg)
             };
         }
 
-        if (style.Padding > 0)
-        {
-            view.Padding = new Thickness(
-                style.Padding,
-                style.Padding,
-                style.Padding,
-                style.Padding
-            );
-        }
+        // NOTE: Terminal.Gui 1.19 View does not have View.Padding.
+        // For now ignore Core Padding to get the project compiling.
+        // Later: implement padding by wrapping views or using Border (if you add it).
     }
 }
